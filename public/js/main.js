@@ -1,5 +1,5 @@
 $(function () {
-  var socket = io('http://localhost:4200');
+  var socket = io(window.location.href);
   let chatForm = document.getElementById('chat-form');
   var player1 = document.getElementById('player-1');
   var player2 = document.getElementById('player-2');
