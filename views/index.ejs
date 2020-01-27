@@ -1,0 +1,28 @@
+<html>
+<head>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="arena">
+    <div id="player-1"></div>
+    <div id="player-2"></div>
+    <div id="item" style="top: 300px; left: 300px;"></div>
+</div>
+<div class="scoreboard">
+    <div id="player-one-score">0</div>
+    <div id="player-two-score">0</div>
+</div>
+<div class="chat-container">
+    <ul id="messages"></ul>
+    <form id="chat-form" action="">
+        <input type="text" id="message">
+        <button type="submit">Send</button>
+    </form>
+</div>
+</body>
+<!--<script src="/socket/lib/client.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="/js/main.js"></script>
+</html>
