@@ -153,6 +153,7 @@ $(function () {
     event.preventDefault();
     let input = document.getElementById('message').value;
     socket.emit('message', input);
+    document.getElementById('message').value = '';
   });
 
   // Move down.
