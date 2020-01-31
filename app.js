@@ -49,6 +49,10 @@ io.on('connection', socket => {
   socket.on('player scored', position => {
     socket.broadcast.emit('player scored', position);
   });
+
+  socket.on('player hit', scoreData => {
+    io.emit('player hit', scoreData);
+  });
 });
 
 module.exports = app;

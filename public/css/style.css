@@ -51,4 +51,11 @@ body {
     right: 0;
 }
 
+.shot {
+    height: 10px;
+    width: 15px;
+    display: block;
+    background: red;
+}
+
 

@@ -22,6 +22,10 @@ $(function () {
     setPlayerTwoScoreBoard(position);
   });
 
+  socket.on('player hit', function (scoreData) {
+    setPlayerTwoScoreBoard(scoreData);
+  });
+
   function getPixelCount(style) {
     var pixelCount = style.split('px')[0];
     return parseInt(pixelCount);
@@ -90,6 +94,13 @@ $(function () {
     }
   }
 
+  function getElementPosition(el) {
+    return {
+      'top': getPixelCount(el.style.top),
+      'left': getPixelCount(el.style.left)
+    }
+  }
+
   function playerHasScored() {
     var playerPosition = getPlayerPosition();
     var itemPosition = getItemPosition();
@@ -121,6 +132,7 @@ $(function () {
   }
 
   function setPlayerTwoScoreBoard(scoreData) {
+    console.log(scoreData['score'].toString());
     player2Score.innerText = scoreData['score'].toString();
   }
 
@@ -145,6 +157,47 @@ $(function () {
 
   function setMovementSpeed() {
     movementSpeed = (score + 1) * 5
+  }
+
+  function createShot() {
+    var shot = document.createElement('div');
+    shot.classList.add('shot');
+    shot.style.left = getLeft();
+    shot.style.top = getTop();
+    shot.style.position = 'absolute';
+    document.getElementsByClassName('arena')[0].appendChild(shot);
+    return shot;
+  }
+
+  function playerHit(shot) {
+    var shotPosition = getElementPosition(shot);
+    var p2Position = getElementPosition(player2);
+    return shotPosition['top'] >= p2Position['top']
+      && shotPosition['top'] <= (p2Position['top'] + 40)
+      && shotPosition['left'] >= p2Position['left']
+      && shotPosition['left'] <= (p2Position['left'] + 40);
+  }
+
+  function decrementScore() {
+    return {'score': parseInt(player2Score.innerText) - 1}
+  }
+
+  function animateShot(shot) {
+    if (playerHit(shot)) {
+      shot.remove();
+      socket.emit('player hit', decrementScore());
+      return;
+    }
+    if (getPixelCount(shot.style.left) !== 640) {
+      setTimeout(function () {
+        shot.style.left = (getPixelCount(shot.style.left) + 5).toString() + 'px';
+        animateShot(shot);
+      }, 10);
+    }
+    else {
+      shot.remove();
+      return;
+    }
   }
 
   // document.addEventListener('DOMContentLoaded', function (event) {
@@ -197,6 +250,14 @@ $(function () {
       movePlayerRight(player1, rightPixels);
       socket.emit('player move', getPlayerPosition());
       checkForScore();
+    }
+  });
+
+  // Fire
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space') {
+      var shot = createShot();
+      animateShot(shot);
     }
   });
   // });
