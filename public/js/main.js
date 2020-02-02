@@ -22,8 +22,17 @@ $(function () {
     setPlayerTwoScoreBoard(position);
   });
 
+  socket.on('player fire', function (shot) {
+    var opponentShot = createOpponentShot(shot);
+    animateOpponentShot(opponentShot);
+  });
+
   socket.on('player hit', function (scoreData) {
-    setPlayerTwoScoreBoard(scoreData);
+    // setPlayerTwoScoreBoard(scoreData);
+  });
+
+  socket.on('opponent hit', function (scoreData) {
+    setPlayerOneScoreBoard(scoreData);
   });
 
   function getPixelCount(style) {
@@ -132,7 +141,6 @@ $(function () {
   }
 
   function setPlayerTwoScoreBoard(scoreData) {
-    console.log(scoreData['score'].toString());
     player2Score.innerText = scoreData['score'].toString();
   }
 
@@ -156,7 +164,8 @@ $(function () {
   }
 
   function setMovementSpeed() {
-    movementSpeed = (score + 1) * 5
+    if (score >= 0)
+      movementSpeed = (score + 1) * 5;
   }
 
   function createShot() {
@@ -165,6 +174,19 @@ $(function () {
     shot.style.left = getLeft();
     shot.style.top = getTop();
     shot.style.position = 'absolute';
+    document.getElementsByClassName('arena')[0].appendChild(shot);
+    return shot;
+  }
+
+  function createOpponentShot(shotPosition) {
+    var mirroredPosition = mirrorLeftPosition(shotPosition);
+    console.log(mirroredPosition);
+    var shot = document.createElement('div');
+    shot.classList.add('shot');
+    shot.style.left = mirroredPosition['left'].toString() + 'px';
+    shot.style.top = mirroredPosition['top'].toString() + 'px';
+    shot.style.position = 'absolute';
+    shot.style.backgroundColor = 'blue';
     document.getElementsByClassName('arena')[0].appendChild(shot);
     return shot;
   }
@@ -178,8 +200,22 @@ $(function () {
       && shotPosition['left'] <= (p2Position['left'] + 40);
   }
 
+  function opponentHit(shot) {
+    var shotPosition = getElementPosition(shot);
+    var p1Position = getElementPosition(player1);
+    return shotPosition['top'] >= p1Position['top']
+      && shotPosition['top'] <= (p1Position['top'] + 40)
+      && shotPosition['left'] >= p1Position['left']
+      && shotPosition['left'] <= (p1Position['left'] + 40);
+  }
+
+  function decrementPlayerOneScore() {
+    score--;
+    return {'score': score}
+  }
+
   function decrementScore() {
-    return {'score': parseInt(player2Score.innerText) - 1}
+    player2Score.innerText = parseInt(player2Score.innerText) - 1;
   }
 
   function animateShot(shot) {
@@ -200,7 +236,25 @@ $(function () {
     }
   }
 
-  // document.addEventListener('DOMContentLoaded', function (event) {
+  function animateOpponentShot(shot) {
+    if (opponentHit(shot)) {
+      shot.remove();
+      decrementPlayerOneScore();
+      setMovementSpeed();
+      socket.emit('opponent hit', score);
+      return;
+    }
+    if (getPixelCount(shot.style.left) !== 0) {
+      setTimeout(function () {
+        shot.style.left = (getPixelCount(shot.style.left) - 5).toString() + 'px';
+        animateOpponentShot(shot);
+      }, 10);
+    }
+    else {
+      shot.remove();
+      return;
+    }
+  }
 
   chatForm.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -257,8 +311,8 @@ $(function () {
   document.addEventListener('keydown', function (e) {
     if (e.code === 'Space') {
       var shot = createShot();
+      socket.emit('player fire', getElementPosition(shot));
       animateShot(shot);
     }
   });
-  // });
 });

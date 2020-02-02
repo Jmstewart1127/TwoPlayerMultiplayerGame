@@ -50,8 +50,16 @@ io.on('connection', socket => {
     socket.broadcast.emit('player scored', position);
   });
 
+  socket.on('player fire', shot => {
+    socket.broadcast.emit('player fire', shot);
+  });
+
   socket.on('player hit', scoreData => {
     io.emit('player hit', scoreData);
+  });
+
+  socket.on('opponent hit', scoreData => {
+    io.emit('opponent hit', scoreData);
   });
 });
 
