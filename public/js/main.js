@@ -1,5 +1,6 @@
 $(function () {
-  var socket = io(window.location.href);
+  var nsp = window.location.hash.split('#');
+  var socket = io('/device');
   let chatForm = document.getElementById('chat-form');
   var player1 = document.getElementById('player-1');
   var player2 = document.getElementById('player-2');
@@ -8,6 +9,11 @@ $(function () {
   var item = document.getElementById('item');
   var score = 0;
   var movementSpeed = 5;
+
+  socket.on('connect', function () {
+    console.log('connected');
+    socket.emit('room', nsp[1]);
+  });
 
   socket.on('message', function (msg) {
     $('#messages').append($('<li>').text(msg));
